@@ -34,7 +34,7 @@
 </jsp:forward>
 <%
    	}
-    count = (int)request.getAttribute("count");
+    count = Integer.parseInt(request.getParameter("count"));
     number = count-(currentPage - 1)*pageSize;
 %>
 <html>
