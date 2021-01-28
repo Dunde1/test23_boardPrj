@@ -27,7 +27,7 @@
     articleList = (List)request.getAttribute("articleList");
   	if(articleList == null){
 %>
-<jsp:forward page="/BoardController?cmd=getAllBoard">
+<jsp:forward page="/getAllBoard.do">
 	<jsp:param value="<%=count %>" name="count"/>
 	<jsp:param value="<%=startRow%>" name="startRow" />
 	<jsp:param value="<%=endRow%>" name="endRow" />

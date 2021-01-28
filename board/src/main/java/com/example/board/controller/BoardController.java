@@ -7,6 +7,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import com.example.board.vo.BoardVO;
+
 @Controller
 public class BoardController {
 	
@@ -16,10 +18,10 @@ public class BoardController {
 		return "list";
 	}
 	
-	@RequestMapping(value = "/home.do", method = RequestMethod.POST)
-	public String home2(Model model) {
+	@RequestMapping(value = "/getAllBoard.do", method = RequestMethod.POST)
+	public String getAllBoard(BoardVO vo) {
 		
-		return "home2";
+		return "getAllBoard";
 	}
 	
 }
