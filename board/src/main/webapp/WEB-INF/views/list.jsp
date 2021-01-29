@@ -1,5 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=EUC-KR"
-    pageEncoding="EUC-KR"%>
+<%@ page language="java" contentType="text/html; charset=EUC-KR" pageEncoding="EUC-KR"%>
 <%@ page import = "com.example.board.vo.BoardVO" %>
 <%@ page import = "java.util.List" %>
 <%@ page import = "java.text.SimpleDateFormat" %>
@@ -9,7 +8,6 @@
     int pageSize = 10;
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 %>
-
 <%	
     String pageNum = request.getParameter("pageNum");
     if (pageNum == null) {
@@ -28,7 +26,7 @@
   	if(articleList == null){
 %>
 <jsp:forward page="/getAllBoard.do">
-	<jsp:param value="<%=count %>" name="count"/>
+	<jsp:param value="<%=count%>" name="count"/>
 	<jsp:param value="<%=startRow%>" name="startRow" />
 	<jsp:param value="<%=endRow%>" name="endRow" />
 </jsp:forward>
@@ -37,6 +35,7 @@
     count = Integer.parseInt(request.getParameter("count"));
     number = count-(currentPage - 1)*pageSize;
 %>
+
 <html>
 <head>
 <title>게시판</title>
@@ -48,7 +47,7 @@
 <table width="700">
 <tr>
     <td align="right" bgcolor="<%=value_c%>">
-    <a href="writeForm.jsp">글쓰기</a>
+    <a href="writeForm.do">글쓰기</a>
     </td>
 </table>
 
@@ -84,16 +83,16 @@
 	      if(vo.getRe_level()>0){
 	        wid=5*(vo.getRe_level());
 	%>
-	  <img src="/boardMVC/board/images/level.gif" width="<%=wid%>" height="16">
-	  <img src="/boardMVC/board/images/re.gif">
+	  <img src="/views/images/level.gif" width="<%=wid%>" height="16">
+	  <img src="/views/images/re.gif">
 	<%}else{%>
-	  <img src="/boardMVC/board/images/level.gif" width="<%=wid%>" height="16">
+	  <img src="/views/images/level.gif" width="<%=wid%>" height="16">
 	<%}%>
            
-      <a href="<%=request.getContextPath()%>/board/content.jsp?num=<%=vo.getNum()%>&pageNum=<%=currentPage%>">
+      <a href="<%=request.getContextPath()%>/views/content.jsp?num=<%=vo.getNum()%>&pageNum=<%=currentPage%>">
            <%=vo.getSubject()%></a> 
           <% if(vo.getReadcount()>=20){%>
-         <img src="/boardMVC/board/images/hot.gif" border="0"  height="16"><%}%> </td>
+         <img src="/views/images/hot.gif" border="0"  height="16"><%}%> </td>
     <td align="center"  width="100"> 
        <a href="mailto:<%=vo.getEmail()%>"><%=vo.getWriter()%></a></td>
     <td align="center"  width="150"><%= sdf.format(vo.getReg_date())%></td>
@@ -114,14 +113,14 @@
         if (endPage > pageCount) endPage = pageCount;
         
         if (startPage > 10) {    %>
-        <a href="/boardMVC/board/list.jsp?pageNum=<%= startPage - 10 %>">[이전]</a>
+        <a href="/views/list.jsp?pageNum=<%= startPage - 10 %>">[이전]</a>
 <%      }
         for (int i = startPage ; i <= endPage ; i++) {  %>
-        <a href="/boardMVC/board/list.jsp?pageNum=<%= i %>">[<%= i %>]</a>
+        <a href="/views/list.jsp?pageNum=<%= i %>">[<%= i %>]</a>
 <%
         }
         if (endPage < pageCount) {  %>
-        <a href="/boardMVC/board/list.jsp?pageNum=<%= startPage + 10 %>">[다음]</a>
+        <a href="/views/list.jsp?pageNum=<%= startPage + 10 %>">[다음]</a>
 <%
         }
     }

@@ -6,6 +6,7 @@ import java.util.*;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import com.example.board.vo.BoardVO;
@@ -16,9 +17,14 @@ public class BoardEntity {
 	private Connection con;
 	private PreparedStatement pstmt;
 	private ResultSet rs ;
-	
 	@Autowired
 	private DataSource ds;
+	@Autowired
+	private JdbcTemplate jdbcTemplate;
+	
+	private final String GET_ARTICLE_COUNT = "select count(*) from board";
+	private final String GET_ALL_BOARD = "select * from (select rownum numrow,"
+			+ " A.* from(select * from board)A) where numrow >= ? and numrow <= ? order by ref desc, re_step asc";
 	
 	private String result;
 
@@ -80,66 +86,12 @@ public class BoardEntity {
 	}
 	
 	public int getArticleCount(){
-		int x=0;
-        try {
-            con = ds.getConnection();
-
-            pstmt = con.prepareStatement("select count(*) from board");
-            rs = pstmt.executeQuery();
-
-            if (rs.next()) {
-//            	rs.getInt(1);
-               x= rs.getInt(1);
-			}
-        } catch(Exception ex) {
-            ex.printStackTrace();
-        } finally {
-            if (rs != null) try { rs.close(); } catch(SQLException ex) {}
-            if (pstmt != null) try { pstmt.close(); } catch(SQLException ex) {}
-            if (con != null) try { con.close(); } catch(SQLException ex) {}
-        }
-        return x;
+        return jdbcTemplate.queryForInt(GET_ARTICLE_COUNT);
     }
 
-
 	public List getAllBoard(int start, int end)  throws Exception {
-		List articleList=null;
-		try {
-			con = ds.getConnection();
-			pstmt = con.prepareStatement(
-					"select * from (select rownum numrow, A.* from(select * from board)A) where numrow >= ? and numrow <= ? order by ref desc, re_step asc");
-			pstmt.setInt(1, start-1);
-			pstmt.setInt(2, end);
-			rs = pstmt.executeQuery();
-
-			if (rs.next()) {
-				articleList = new ArrayList(end);
-				do{
-					BoardVO vo = new BoardVO();
-					vo.setNum(rs.getInt("num"));
-					vo.setWriter(rs.getString("writer"));
-					vo.setEmail(rs.getString("email"));
-					vo.setSubject(rs.getString("subject"));
-					vo.setPasswd(rs.getString("passwd"));
-					vo.setReg_date(rs.getTimestamp("reg_date"));
-					vo.setReadcount(rs.getInt("readcount"));
-					vo.setRef(rs.getInt("ref"));
-					vo.setRe_step(rs.getInt("re_step"));
-					vo.setRe_level(rs.getInt("re_level"));
-					vo.setContent(rs.getString("content"));
-					vo.setIp(rs.getString("ip")); 
-
-					articleList.add(vo);
-				}while(rs.next());
-			}
-		} catch(Exception ex) {
-			ex.printStackTrace();
-		} finally {
-			if (rs != null) try { rs.close(); } catch(SQLException ex) {}
-			if (pstmt != null) try { pstmt.close(); } catch(SQLException ex) {}
-			if (con != null) try { con.close(); } catch(SQLException ex) {}
-		}
-		return articleList;
+		Object[] args = {start-1, end};
+		return jdbcTemplate.query(GET_ALL_BOARD, args, new BoardRowMapper());
 	}
 
     public BoardVO getBoard(BoardVO vo) throws Exception {
