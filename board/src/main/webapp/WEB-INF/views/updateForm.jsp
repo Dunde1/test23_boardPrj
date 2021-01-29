@@ -1,8 +1,7 @@
-<%@ page language="java" contentType="text/html; charset=EUC-KR"
-    pageEncoding="EUC-KR"%>
-<%@ page import = "vo.BoardVO" %>
-<%@ page import = "entity.BoardEntity" %>
-<%@ include file="color.jspf"%>
+<%@ page language="java" contentType="text/html; charset=EUC-KR" pageEncoding="EUC-KR"%>
+<%@ page import = "com.example.board.vo.BoardVO" %>
+<%@ page import = "com.example.board.entity.BoardEntity" %>
+<%@ include file= "color.jspf"%>
 <html>
 <head>
 <title>°Ô½ÃÆÇ</title>

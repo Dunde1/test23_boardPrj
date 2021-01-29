@@ -23,8 +23,14 @@ public class BoardEntity {
 	private JdbcTemplate jdbcTemplate;
 	
 	private final String GET_ARTICLE_COUNT = "select count(*) from board";
+	private final String GET_BOARD_UDT = "update board set readcount=readcount+1 where num = ?";
+	private final String GET_BOARD_GET = "select * from board where num = ?";
 	private final String GET_ALL_BOARD = "select * from (select rownum numrow,"
 			+ " A.* from(select * from board)A) where numrow >= ? and numrow <= ? order by ref desc, re_step asc";
+	private final String INSERT_BOARD_CNT = "select max(num) from board";
+	private final String INSERT_BOARD_UDT = "update board set re_step=re_step+1 where ref= ? and re_step> ?";
+	private final String INSERT_BOARD_INS = "insert into board(num,writer,email,subject,passwd,reg_date,readcount,ref,re_step,re_level,content,ip)"
+			+ " values(seq_log.nextval,?,?,?,?,?,?,?,?,?,?,?)";
 	
 	private String result;
 
@@ -34,55 +40,21 @@ public class BoardEntity {
 		int re_step = vo.getRe_step();
 		int re_level = vo.getRe_level();
 		int number = 0;
-		String query = "";
+		
+		number = jdbcTemplate.queryForInt(INSERT_BOARD_CNT);
+		number++;
 
-		try {
-			con = ds.getConnection();
-
-			pstmt = con.prepareStatement("select max(num) from board");
-			rs = pstmt.executeQuery();
-
-			if(rs.next()){
-				number = rs.getInt(1)+1;
-			}else{
-				number = 1;
-			}
-
-			if(num != 0){
-				query = "update board set re_step=re_step+1 where ref= ? and re_step> ?";
-				pstmt = con.prepareStatement(query);
-				pstmt.setInt(1, ref);
-				pstmt.setInt(2, re_step);
-				pstmt.executeUpdate();
-				re_step=re_step+1;
-				re_level=re_level+1;
-			}else{
-				ref=number;
-				re_step=0;
-				re_level=0;
-			}	 
-			query="insert into board(num,writer,email,subject,passwd,reg_date,readcount,ref,re_step,re_level,content,ip) values(seq_log.nextval,?,?,?,?,?,?,?,?,?,?,?)";
-
-			pstmt = con.prepareStatement(query);
-			pstmt.setString(1, vo.getWriter());
-			pstmt.setString(2, vo.getEmail());
-			pstmt.setString(3, vo.getSubject());
-			pstmt.setString(4, vo.getPasswd());
-			pstmt.setTimestamp(5, vo.getReg_date());
-			pstmt.setInt(6, vo.getReadcount());
-			pstmt.setInt(7, ref);
-			pstmt.setInt(8, re_step);
-			pstmt.setInt(9, re_level);
-			pstmt.setString(10, vo.getContent());
-			pstmt.setString(11, vo.getIp());
-			pstmt.executeUpdate();
-		} catch(Exception ex) {
-			ex.printStackTrace();
-		} finally {
-			if (rs != null) try { rs.close(); } catch(SQLException ex) {}
-			if (pstmt != null) try { pstmt.close(); } catch(SQLException ex) {}
-			if (con != null) try { con.close(); } catch(SQLException ex) {}
+		if(num != 0){
+			jdbcTemplate.update(INSERT_BOARD_UDT, ref, re_step);
+			re_step=re_step+1;
+			re_level=re_level+1;
+		}else{
+			ref=number;
+			re_step=0;
+			re_level=0;
 		}
+		jdbcTemplate.update(INSERT_BOARD_INS, vo.getWriter(), vo.getEmail(), vo.getSubject(), vo.getPasswd(),
+							vo.getReg_date(), vo.getReadcount(), ref, re_step, re_level, vo.getContent(), vo.getIp());
 	}
 	
 	public int getArticleCount(){
@@ -95,45 +67,9 @@ public class BoardEntity {
 	}
 
     public BoardVO getBoard(BoardVO vo) throws Exception {
-    	int num = vo.getNum();
-        ResultSet rs = null;
-
-        try {
-            con = ds.getConnection();
-
-            pstmt = con.prepareStatement(
-            	"update board set readcount=readcount+1 where num = ?");
-			pstmt.setInt(1, num);
-			pstmt.executeUpdate();
-
-            pstmt = con.prepareStatement(
-            	"select * from board where num = ?");
-            pstmt.setInt(1, num);
-            rs = pstmt.executeQuery();
-
-            if (rs.next()) {
-            	vo = new BoardVO();
-            	vo.setNum(rs.getInt("num"));
-            	vo.setWriter(rs.getString("writer"));
-            	vo.setEmail(rs.getString("email"));
-                vo.setSubject(rs.getString("subject"));
-                vo.setPasswd(rs.getString("passwd"));
-                vo.setReg_date(rs.getTimestamp("reg_date"));
-                vo.setReadcount(rs.getInt("readcount"));
-                vo.setRef(rs.getInt("ref"));
-                vo.setRe_step(rs.getInt("re_step"));
-                vo.setRe_level(rs.getInt("re_level"));
-                vo.setContent(rs.getString("content"));
-                vo.setIp(rs.getString("ip"));     
-			}
-        } catch(Exception ex) {
-            ex.printStackTrace();
-        } finally {
-            if (rs != null) try { rs.close(); } catch(SQLException ex) {}
-            if (pstmt != null) try { pstmt.close(); } catch(SQLException ex) {}
-            if (con != null) try { con.close(); } catch(SQLException ex) {}
-        }
-		return vo;
+        Object[] args = {vo.getNum()};
+        jdbcTemplate.update(GET_BOARD_UDT, vo.getNum());
+        return jdbcTemplate.queryForObject(GET_BOARD_GET, args, new BoardRowMapper());
     }
 
     public BoardVO updateGetBoard(BoardVO vo) throws Exception {

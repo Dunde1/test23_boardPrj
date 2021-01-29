@@ -1,7 +1,8 @@
-<%@ page language="java" contentType="text/html; charset=EUC-KR" pageEncoding="EUC-KR"%>
-<%@ page import = "com.example.board.vo.BoardVO" %>
-<%@ page import = "java.util.List" %>
-<%@ page import = "java.text.SimpleDateFormat" %>
+<%@ page language="java" contentType="text/html; charset=EUC-KR"
+	pageEncoding="EUC-KR"%>
+<%@ page import="com.example.board.vo.BoardVO"%>
+<%@ page import="java.util.List"%>
+<%@ page import="java.text.SimpleDateFormat"%>
 <%@ include file="color.jspf"%>
 
 <%!
@@ -17,7 +18,7 @@
     int startRow = (currentPage - 1) * pageSize + 1;
     int endRow = currentPage * pageSize;
     int count = 0;
-    int number=0;
+    int number = 0;
  
     List articleList = null;   	
       	
@@ -26,14 +27,15 @@
   	if(articleList == null){
 %>
 <jsp:forward page="/getAllBoard.do">
-	<jsp:param value="<%=count%>" name="count"/>
+	<jsp:param value="<%=count%>" name="count" />
 	<jsp:param value="<%=startRow%>" name="startRow" />
 	<jsp:param value="<%=endRow%>" name="endRow" />
 </jsp:forward>
 <%
    	}
-    count = Integer.parseInt(request.getParameter("count"));
+    count = (int)request.getAttribute("count");
     number = count-(currentPage - 1)*pageSize;
+    
 %>
 
 <html>
@@ -43,65 +45,84 @@
 </head>
 
 <body bgcolor="<%=bodyback_c%>">
-<center><b>글목록(전체 글:<%=count%>)</b>
-<table width="700">
-<tr>
-    <td align="right" bgcolor="<%=value_c%>">
-    <a href="writeForm.do">글쓰기</a>
-    </td>
-</table>
+	<center>
+		<b>글목록(전체 글:${count})</b>
+		<table width="700">
+			<tr>
+				<td align="right" bgcolor="<%=value_c%>"><a href="writeForm.do">글쓰기</a>
+				</td>
+		</table>
 
 <%
     if (count == 0) {
 %>
-<table width="700" border="1" cellpadding="0" cellspacing="0">
-<tr>
-    <td align="center">
-    게시판에 저장된 글이 없습니다.
-    </td>
-</table>
+		<table width="700" border="1" cellpadding="0" cellspacing="0">
+			<tr>
+				<td align="center">게시판에 저장된 글이 없습니다.</td>
+		</table>
 
 <%  } else {    %>
-<table border="1" width="700" cellpadding="0" cellspacing="0" align="center"> 
-    <tr height="30" bgcolor="<%=value_c%>"> 
-      <td align="center"  width="50"  >번 호</td> 
-      <td align="center"  width="250" >제   목</td> 
-      <td align="center"  width="100" >작성자</td>
-      <td align="center"  width="150" >작성일</td> 
-      <td align="center"  width="50" >조 회</td> 
-      <td align="center"  width="100" >IP</td>    
-    </tr>
+
+		<table border="1" width="700" cellpadding="0" cellspacing="0" align="center">
+			<tr height="30" bgcolor="<%=value_c%>">
+				<td align="center" width="50">번 호</td>
+				<td align="center" width="250">제 목</td>
+				<td align="center" width="100">작성자</td>
+				<td align="center" width="150">작성일</td>
+				<td align="center" width="50">조 회</td>
+				<td align="center" width="100">IP</td>
+			</tr>
 <%  
         for (int i = 0 ; i < articleList.size() ; i++) {
-          BoardVO vo = (BoardVO)articleList.get(i);
+			BoardVO vo = (BoardVO)articleList.get(i);
 %>
-   <tr height="30">
-    <td align="center"  width="50" > <%=number--%></td>
-    <td  width="250" >
-	<%
-	      int wid=0; 
-	      if(vo.getRe_level()>0){
-	        wid=5*(vo.getRe_level());
-	%>
-	  <img src="/views/images/level.gif" width="<%=wid%>" height="16">
-	  <img src="/views/images/re.gif">
-	<%}else{%>
-	  <img src="/views/images/level.gif" width="<%=wid%>" height="16">
-	<%}%>
-           
-      <a href="<%=request.getContextPath()%>/views/content.jsp?num=<%=vo.getNum()%>&pageNum=<%=currentPage%>">
-           <%=vo.getSubject()%></a> 
-          <% if(vo.getReadcount()>=20){%>
-         <img src="/views/images/hot.gif" border="0"  height="16"><%}%> </td>
-    <td align="center"  width="100"> 
-       <a href="mailto:<%=vo.getEmail()%>"><%=vo.getWriter()%></a></td>
-    <td align="center"  width="150"><%= sdf.format(vo.getReg_date())%></td>
-    <td align="center"  width="50"><%=vo.getReadcount()%></td>
-    <td align="center" width="100" ><%=vo.getIp()%></td>
-  </tr>
-     <%}%>
-</table>
-<%}%>
+			<tr height="30">
+				<td align="center" width="50"><%=number--%></td>
+				<td width="250">
+<%
+	      	int wid=0; 
+	      	if(vo.getRe_level()>0){
+	        	wid=5*(vo.getRe_level());
+%> 					<img src="/views/images/level.gif" width="<%=wid%>" height="5"><img src="/views/images/re.gif">
+<%			}else{
+%>					<img src="/views/images/level.gif" width="<%=wid%>" height="5">
+<%
+			}
+%>					<form id="content<%=i%>" action="content.do" method="get" style="float:left;margin:0;">
+						<input type="hidden" value="<%=vo.getNum()%>" name="num">
+						<input type="hidden" value="<%=currentPage%>" name="pageNum">
+						<a href="#" onclick="document.getElementById('content<%=i%>').submit();"><center><%=vo.getSubject()%></center></a>
+					</form>
+<%
+			if(vo.getReadcount()>=20){
+%>
+					<img src="/views/images/hot.gif" border="0" height="16">
+<%
+			}
+%>
+				</td>
+				<td align="center" width="100">
+					<a href="mailto:<%=vo.getEmail()%>">
+						<%=vo.getWriter()%>
+					</a>
+				</td>
+				<td align="center" width="150">
+					<%= sdf.format(vo.getReg_date())%>
+				</td>
+				<td align="center" width="50">
+					<%=vo.getReadcount()%>
+				</td>
+				<td align="center" width="100">
+					<%=vo.getIp()%>
+				</td>
+			</tr>
+<%
+		}
+%>
+		</table>
+<%
+	}
+%>
 
 <%
     if (count > 0) {
@@ -112,19 +133,27 @@
         int endPage = startPage + pageBlock-1;
         if (endPage > pageCount) endPage = pageCount;
         
-        if (startPage > 10) {    %>
-        <a href="/views/list.jsp?pageNum=<%= startPage - 10 %>">[이전]</a>
-<%      }
-        for (int i = startPage ; i <= endPage ; i++) {  %>
-        <a href="/views/list.jsp?pageNum=<%= i %>">[<%= i %>]</a>
+        if (startPage > 10) {
+%>
+			<a href="/views/list.jsp?pageNum=<%= startPage - 10 %>">[이전]</a>
+<%
+		}
+        for (int i = startPage ; i <= endPage ; i++) {
+%>
+			<a href="/views/list.jsp?pageNum=<%= i %>">
+				[<%= i %>]
+			</a>
 <%
         }
-        if (endPage < pageCount) {  %>
-        <a href="/views/list.jsp?pageNum=<%= startPage + 10 %>">[다음]</a>
+        if (endPage < pageCount) {
+%>
+			<a href="/views/list.jsp?pageNum=<%= startPage + 10 %>">
+				[다음]
+			</a>
 <%
         }
     }
 %>
-</center>
+	</center>
 </body>
 </html>
